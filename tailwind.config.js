@@ -8,6 +8,9 @@ module.exports = {
   theme: {
     extend: {
       animation: {
+        blob1: 'blob 5s infinite',
+        blob2: 'blob 7s infinite',
+        blob3: 'blob 9s infinite',
         'gradient-x': 'gradient-x 15s ease infinite',
         'gradient-y': 'gradient-y 15s ease infinite',
         'gradient-xy': 'gradient-xy 15s ease infinite',
@@ -43,17 +46,6 @@ module.exports = {
             'background-position': 'right center',
           },
         },
-      },
-      colors: {
-        'indian-orange': '#ff8000',
-        green: {
-          650: '#008000',
-        },
-      },
-      animation: {
-        blob: 'blob 7s infinite',
-      },
-      keyframes: {
         blob: {
           '0%': {
             transform: 'translate(0px, 0px) scale(1)',
@@ -67,6 +59,12 @@ module.exports = {
           '100%': {
             transform: 'translate(0px, 0px) scale(1)',
           },
+        },
+      },
+      colors: {
+        'indian-orange': '#ff8000',
+        green: {
+          650: '#008000',
         },
       },
     },
