@@ -1,10 +1,5 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## ChatGPT Prompt used
-```
-I'm cooking spicy shrimp pad thai for dinner. Provide wine pairings in JSON format with the following keys: "grape", "grape_description", "recommendations", and "reasoning". Use a bulleted list for "reasoning" instead of long sentences. For each item in the "reasoning" list, begin the item with an emoji that represents that item.
-```
-
 ## Getting Started
 
 First, run the development server:
