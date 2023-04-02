@@ -364,7 +364,7 @@ export default function Home() {
           }}
         />
       </div>
-      <div className='h-24'>
+      <div className='h-10 md:h-24'>
         {loading && <Loading {...{ loading, loadingCtrls, glassCtrls }} />}
       </div>
       <CardDisplay cardRefs={cardRefs} pairings={response} />
@@ -560,7 +560,7 @@ function FormInput({
             type='text'
             name='query'
             id='query'
-            className='-ml-3 w-full block flex-1 border-0 bg-transparent disabled:select-none disabled:text-gray-500 text-gray-800 focus:ring-0 sm:text-sm md:text-lg'
+            className='-ml-3 w-full block flex-1 border-0 bg-transparent disabled:select-none disabled:text-gray-500 text-gray-800 focus:ring-0 sm:text-sm md:text-lg overflow-x-scroll'
             placeholder=''
           />
           <span
@@ -654,7 +654,7 @@ function CardDisplay({ cardRefs, pairings }: CardDisplayProps) {
         initial='hidden'
         animate={cardCtrls}
         variants={cardsAnimation}
-        className='z-10 m-2 py-8 md:m-6 md:px-32 touch-pan-x snap-x snap-mandatory grid grid-flow-col scroll-mx-2 space-x-2 md:space-x-4 overflow-x-scroll h-full md:h-[60vh]'
+        className='z-10 m-2 py-2 md:py-8 md:m-6 md:px-32 touch-pan-x snap-x snap-mandatory grid grid-flow-col scroll-mx-2 space-x-2 md:space-x-4 overflow-x-scroll h-full md:h-[60vh]'
       >
         {pairings?.map((wine, i) => (
           <Card
