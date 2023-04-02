@@ -387,6 +387,7 @@ function Loading({
         .split(' ')
         .map((word, index) => (
           <motion.span
+            key={`loading-${word}`}
             className='mr-1 inline-block text-xl md:text-3xl font-black text-white'
             aria-hidden='true'
             initial='hidden'
@@ -540,7 +541,7 @@ function FormInput({
       >
         <div className='sm:text-sm md:text-lg h-10 relative flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md md:max-w-lg w-full'>
           <span className='flex select-none items-center pl-2 text-gray-500 w-24'>
-            I'm eating
+            I&rquo;m eating
           </span>
           <input
             onChange={(e) => {
@@ -572,6 +573,7 @@ function FormInput({
           >
             {example.split(' ').map((word, index) => (
               <motion.span
+                key={`pr-ex-${word}`}
                 className='mr-1'
                 aria-hidden='true'
                 initial='hidden'
@@ -771,6 +773,8 @@ const Card = forwardRef<HTMLDivElement, Card>(
     );
   },
 );
+
+Card.displayName = 'Card';
 
 // Hook
 function useWindowSize() {
