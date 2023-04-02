@@ -13,7 +13,10 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export async function POST(request: Request) {
+  // Get query from request body
   const query = await request.json();
+
+  // Formulate ChatGPT Query
   const queryContent = `
     I'm eating ${query['query']}.
     Recommend three wine pairings for my meal in JSON list format with the following keys: "grape", "grape_color", "grape_description", "recommendations", and "reasoning". 
@@ -23,13 +26,16 @@ export async function POST(request: Request) {
     For "recommendations", use an array, recommend specific brands and vintages, and include the year produced.
   `.replace('\n', ' ');
   var response = {};
+
   try {
     console.log(`Submitting query for ${query['query']}`);
+
+    // Submit query to OpenAI
     const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: queryContent }],
     });
-    console.log(completion);
+    console.log(completion.data);
     if (
       completion.data &&
       completion.data.choices.length &&
