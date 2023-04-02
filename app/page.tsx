@@ -3,6 +3,7 @@ import {
   Dispatch,
   RefObject,
   SetStateAction,
+  createRef,
   forwardRef,
   useEffect,
   useRef,
@@ -253,7 +254,9 @@ export default function Home() {
   const { width, height } = useWindowSize();
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [response, setResponse] = useState<WinePairing[]>();
+  const [response, setResponse] = useState<WinePairing[] | undefined>(
+    undefined,
+  );
   const [scope, animate] = useAnimate();
   const loadingCtrls = useAnimation();
   const glassCtrls = useAnimation();
@@ -345,12 +348,10 @@ export default function Home() {
     }
   }, [loading]);
 
-  useEffect(() => {}, [scope, card1Ref, card2Ref, card3Ref, response]);
-
   return (
-    <main className='flex flex-col items-center justify-center h-screen min-w-screen bg-slate-800'>
+    <main className='flex flex-col w-full h-screen md:min-w-screen bg-slate-800 lg:items-center lg:justify-center overflow-hidden'>
       <Blobs {...{ scope, width, height }} />
-      <div className='w-full max-w-2xl'>
+      <div className='mx-auto w-full max-w-2xl'>
         <FormInput
           {...{
             loading,
@@ -362,10 +363,10 @@ export default function Home() {
           }}
         />
       </div>
-      <Loading {...{ loading, loadingCtrls, glassCtrls }} />
-      <div className='relative h-3/5'>
-        <CardDisplay cardRefs={cardRefs} pairings={response} />
+      <div className='h-24'>
+        {loading && <Loading {...{ loading, loadingCtrls, glassCtrls }} />}
       </div>
+      <CardDisplay cardRefs={cardRefs} pairings={response} />
     </main>
   );
 }
@@ -380,12 +381,12 @@ function Loading({
   glassCtrls: AnimationControls;
 }) {
   return (
-    <div className='relative'>
+    <div className='relative text-center p-2 md:p-0 lg:mt-4'>
       {'Hang tight while our Sommelier finds the perfect wines for you...'
         .split(' ')
         .map((word, index) => (
           <motion.span
-            className='mr-1 inline-block text-3xl font-black text-white'
+            className='mr-1 inline-block text-xl md:text-3xl font-black text-white'
             aria-hidden='true'
             initial='hidden'
             animate={loadingCtrls}
@@ -470,6 +471,19 @@ interface FormInputProps {
   setResponse: Dispatch<SetStateAction<WinePairing[] | undefined>>;
 }
 
+const examples = [
+  'spicy shrimp pad thai',
+  'chicken parmesan',
+  'manchego cheese',
+  'chocolate cake',
+  'chicken tikka masala',
+  'chicken pot pie',
+  'chicken and dumplings',
+  'eggplant parmigiana',
+  'shrimp scampi',
+  'mussels with white wine and butter',
+];
+
 function FormInput({
   loading,
   setLoading,
@@ -480,11 +494,7 @@ function FormInput({
 }: FormInputProps) {
   const [value, setValue] = useState('');
   const inputCtrls = useAnimation();
-  const [example, cycleExample] = useCycle(
-    'spicy shrimp pad thai',
-    'steak and potatoes',
-    'chicken parmesan',
-  );
+  const [example, cycleExample] = useCycle(...examples);
 
   useEffect(() => {
     if (loading) {
@@ -508,28 +518,28 @@ function FormInput({
 
   const handleSubmit = async () => {
     setLoading(true);
-    // setResponse(await fetchWinePairing(value));
-    // setLoading(false);
-    setTimeout(() => {
-      setLoading(false);
-      console.log('Response', response);
-      setResponse(mockData);
-    }, 10000);
+    setResponse(await fetchWinePairing(value));
+    setLoading(false);
+    // setTimeout(() => {
+    //   setLoading(false);
+    //   console.log('Response', response);
+    //   setResponse(mockData);
+    // }, 10000);
   };
 
   return (
-    <div className='m-8 relative space-y-4'>
+    <div className='m-2 relative space-y-2 md:space-y-4'>
       <form
         onSubmit={(e) => {
           e.preventDefault();
           setLoading(true);
           handleSubmit();
         }}
-        className='p-5 bg-white rounded-lg flex items-center justify-between space-x-4'
+        className='p-2 md:p-5 bg-white rounded-lg flex items-center justify-between space-x-1 md:space-x-4'
       >
         <div className='sm:text-sm md:text-lg h-10 relative flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md md:max-w-lg w-full'>
-          <span className='flex select-none items-center pl-3 text-gray-500 w-28'>
-            I'm cooking
+          <span className='flex select-none items-center pl-2 text-gray-500 w-24'>
+            I'm eating
           </span>
           <input
             onChange={(e) => {
@@ -556,7 +566,7 @@ function FormInput({
               {
                 hidden: !!value,
               },
-              'pointer-events-none flex select-none items-center text-gray-500 absolute inset-y-0 left-28',
+              'pointer-events-none flex select-none items-center text-gray-500 absolute inset-y-0 left-24',
             )}
           >
             {example.split(' ').map((word, index) => (
@@ -621,6 +631,7 @@ interface CardDisplayProps {
 }
 
 function CardDisplay({ cardRefs, pairings }: CardDisplayProps) {
+  const cardDisplayRef = useRef<HTMLDivElement>(null);
   const cardCtrls = useAnimation();
 
   useEffect(() => {
@@ -632,64 +643,123 @@ function CardDisplay({ cardRefs, pairings }: CardDisplayProps) {
   }, [pairings]);
 
   return (
-    <motion.div
-      aria-hidden='true'
-      initial='hidden'
-      animate={cardCtrls}
-      variants={cardsAnimation}
-      className='space-x-3 flex flex-row items-top relative w-full h-full max-w-screen-2xl'
-    >
-      {pairings?.map((wine, i) => (
-        <Card ref={cardRefs[i]} wine={wine} key={wine.grape} />
-      ))}
-    </motion.div>
+    <>
+      <motion.div
+        ref={cardDisplayRef}
+        id='card-display'
+        aria-hidden='true'
+        initial='hidden'
+        animate={cardCtrls}
+        variants={cardsAnimation}
+        className='z-10 m-2 py-8 md:m-6 md:px-32 touch-pan-x snap-x snap-mandatory grid grid-flow-col scroll-mx-2 space-x-2 md:space-x-4 overflow-x-scroll h-full md:h-[60vh]'
+      >
+        {pairings?.map((wine, i) => (
+          <Card
+            cardDisplayRef={cardDisplayRef}
+            ref={cardRefs[i]}
+            wine={wine}
+            key={wine.grape}
+          />
+        ))}
+      </motion.div>
+      <div className='p-2 lg:hidden flex flex-row justify-between text-white'>
+        <button
+          onClick={() => {
+            cardDisplayRef.current?.scrollBy({
+              left: -cardDisplayRef.current?.clientWidth,
+            });
+          }}
+          className='w-12 p-2 text-white bg-gray-500 rounded-full'
+        >
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'>
+            <rect width='32' height='32' fill='none' />
+            <path
+              d='M120,32,24,128l96,96V176h88a8,8,0,0,0,8-8V88a8,8,0,0,0-8-8H120Z'
+              fill='none'
+              stroke='currentColor'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              stroke-width='16'
+            />
+          </svg>
+        </button>
+        <button
+          onClick={() => {
+            cardDisplayRef.current?.scrollBy({
+              left: cardDisplayRef.current?.clientWidth,
+            });
+          }}
+          className='w-12 p-2 text-white bg-gray-500 rounded-full'
+        >
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'>
+            <rect width='32' height='32' fill='none' />
+            <path
+              d='M136,32l96,96-96,96V176H48a8,8,0,0,1-8-8V88a8,8,0,0,1,8-8h88Z'
+              fill='none'
+              stroke='currentColor'
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              stroke-width='16'
+            />
+          </svg>
+        </button>
+      </div>
+    </>
   );
 }
 
 interface Card {
+  cardDisplayRef: RefObject<HTMLDivElement>;
   wine: WinePairing;
 }
 
-const Card = forwardRef<HTMLDivElement, Card>(({ wine }: Card, ref) => {
-  return (
-    <motion.div
-      ref={ref}
-      variants={cardAnimation}
-      className='flex flex-col p-4 w-1/3 bg-gray-50 rounded-lg'
-    >
-      <div className='h-1/3'>
-        <div className='flex flex-row items-center justify-between'>
-          <h3 className='w-full lg:text-2xl font-black text-gray-800 text-lg'>
-            {wine.grape}
-          </h3>
-          <div
-            className={cx({
-              'w-5 h-5 rounded-full ring-2 ring-gray-300 ring-offset-0': true,
-              'bg-red-600/50': wine.grape_color.toLowerCase() === 'red',
-              'bg-yellow-100/75': wine.grape_color.toLowerCase() === 'white',
-            })}
-          ></div>
+const Card = forwardRef<HTMLDivElement, Card>(
+  ({ cardDisplayRef, wine }: Card, ref) => {
+    return (
+      <motion.div
+        onMouseDown={(e) => {
+          console.log(e);
+        }}
+        ref={ref}
+        variants={cardAnimation}
+        className='flex-none snap-center snap-always grid grid-flow-row w-[90vw] md:w-[80vw] lg:w-[30vw] p-3 md:p-4 bg-gray-50 rounded-lg'
+      >
+        <div>
+          <div className='flex flex-row items-center justify-between'>
+            <h3 className='w-full lg:text-2xl font-black text-gray-800 text-lg'>
+              {wine.grape}
+            </h3>
+            <div
+              className={cx({
+                'w-5 h-5 rounded-full ring-2 ring-gray-300 ring-offset-0': true,
+                'bg-red-600/50': wine.grape_color.toLowerCase() === 'red',
+                'bg-yellow-100/75': wine.grape_color.toLowerCase() === 'white',
+              })}
+            ></div>
+          </div>
+          <p className='mt-2 lg:text-xl text-gray-800'>
+            {wine.grape_description}
+          </p>
         </div>
-        <p className='mt-2 lg:text-xl text-gray-800'>
-          {wine.grape_description}
-        </p>
-      </div>
-      <ul className='h-1/3 mt-2 text-gray-800 lg:text-lg'>
-        {wine.reasoning.map((reason, index) => (
-          <li key={`${wine.grape}-reason-${index}`}>{reason}</li>
-        ))}
-      </ul>
-      <span className='mt-4 text-gray-700 font-semibold mb-2'>
-        Recommendations:
-      </span>
-      <ul className='ml-2 space-y-2'>
-        {wine.recommendations.map((rec, index) => (
-          <li key={`${wine.grape}-rec-${index}`}>{rec}</li>
-        ))}
-      </ul>
-    </motion.div>
-  );
-});
+        <ul className='space-y-2 mt-2 text-gray-800 text-sm md:text-base lg:text-lg'>
+          {wine.reasoning.map((reason, index) => (
+            <li key={`${wine.grape}-reason-${index}`}>{reason}</li>
+          ))}
+        </ul>
+        <div>
+          <span className='mt-4 text-gray-700 font-semibold mb-4'>
+            Recommendations:
+          </span>
+          <ul className='ml-2 space-y-2'>
+            {wine.recommendations.map((rec, index) => (
+              <li key={`${wine.grape}-rec-${index}`}>{rec}</li>
+            ))}
+          </ul>
+        </div>
+      </motion.div>
+    );
+  },
+);
 
 // Hook
 function useWindowSize() {
@@ -716,4 +786,24 @@ function useWindowSize() {
     return () => window.removeEventListener('resize', handleResize);
   }, []); // Empty array ensures that effect is only run on mount
   return windowSize;
+}
+
+function shuffle<T>(array: T[]): T[] {
+  let currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
 }

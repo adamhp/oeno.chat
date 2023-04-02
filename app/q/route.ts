@@ -15,12 +15,12 @@ const openai = new OpenAIApi(configuration);
 export async function POST(request: Request) {
   const query = await request.json();
   const queryContent = `
-    I'm cooking ${query['query']}.
+    I'm eating ${query['query']}.
     Recommend three wine pairings for my meal in JSON list format with the following keys: "grape", "grape_color", "grape_description", "recommendations", and "reasoning". 
-    I prefer lesser known vintages.
+    I prefer lesser known producers.
     For the "grape_description", elaborate on the grape's flavor profile.
     For "reasoning", use an array of concise sentences and begin each sentence using a single unique emoji that represents that sentence. Do not begin any sentence with "the". 
-    For "recommendations", use an array and include the year produced.
+    For "recommendations", use an array, recommend specific brands and vintages, and include the year produced.
   `.replace('\n', ' ');
   var response = {};
   try {
@@ -29,6 +29,7 @@ export async function POST(request: Request) {
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: queryContent }],
     });
+    console.log(completion);
     if (
       completion.data &&
       completion.data.choices.length &&

@@ -11,6 +11,18 @@
 .debug-yellow {
   @apply border border-yellow-500;
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+#card-display::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+#card-display {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 #wine {
   fill: #8b0000;
   stroke: #8b0000;
