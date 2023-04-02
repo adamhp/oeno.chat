@@ -541,7 +541,7 @@ function FormInput({
       >
         <div className='sm:text-sm md:text-lg h-10 relative flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md md:max-w-lg w-full'>
           <span className='flex select-none items-center pl-2 text-gray-500 w-24'>
-            I&rquo;m eating
+            I&apos;m eating
           </span>
           <input
             onChange={(e) => {
@@ -680,9 +680,9 @@ function CardDisplay({ cardRefs, pairings }: CardDisplayProps) {
               d='M120,32,24,128l96,96V176h88a8,8,0,0,0,8-8V88a8,8,0,0,0-8-8H120Z'
               fill='none'
               stroke='currentColor'
-              stroke-linecap='round'
-              stroke-linejoin='round'
-              stroke-width='16'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='16'
             />
           </svg>
         </button>
@@ -700,9 +700,9 @@ function CardDisplay({ cardRefs, pairings }: CardDisplayProps) {
               d='M136,32l96,96-96,96V176H48a8,8,0,0,1-8-8V88a8,8,0,0,1,8-8h88Z'
               fill='none'
               stroke='currentColor'
-              stroke-linecap='round'
-              stroke-linejoin='round'
-              stroke-width='16'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='16'
             />
           </svg>
         </button>
