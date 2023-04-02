@@ -11,3 +11,61 @@
 .debug-yellow {
   @apply border border-yellow-500;
 }
+#wine {
+  fill: #8b0000;
+  stroke: #8b0000;
+  stroke-width: 3;
+}
+.glass-ctr {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.glass {
+  width: 300px;
+  height: 320px;
+  background-color: rgb(255, 255, 255, 0.75);
+  position: absolute;
+  -webkit-clip-path: polygon(0 1%, 100% 0, 95% 100%, 6% 100%);
+  clip-path: polygon(0% 0%, 100% 0, 90% 100%, 10% 100%);
+  border-radius: 50% 50% 0 0;
+  transform: rotate(180deg);
+}
+
+.water-ctr {
+  top: -10;
+  width: 250px;
+  height: 270px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.25);
+  -webkit-clip-path: polygon(0 1%, 100% 0, 95% 100%, 6% 100%);
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+  border-radius: 0% 0% 50% 50%;
+}
+
+.water {
+  width: 4000px;
+  height: 250px;
+  background-image: url('/wave.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  position: relative;
+  animation: mymove 10s;
+  animation-fill-mode: forwards;
+  z-index: 1;
+}
+
+@keyframes mymove {
+  0% {
+    right: 0px;
+    top: 270px;
+  }
+  100% {
+    right: 1500px;
+    top: 80px;
+  }
+}

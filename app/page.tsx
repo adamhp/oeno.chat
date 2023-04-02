@@ -10,7 +10,14 @@ import {
 } from 'react';
 
 import cx from 'classnames';
-import { motion, useAnimate, useAnimation, useCycle } from 'framer-motion';
+import {
+  AnimationControls,
+  AnimationScope,
+  motion,
+  useAnimate,
+  useAnimation,
+  useCycle,
+} from 'framer-motion';
 
 interface WinePairing {
   grape: string;
@@ -76,14 +83,63 @@ const wordAnimation = {
   visible: {},
 };
 
-const characterAnimation = {
+const glassAnimation = {
   hidden: {
     opacity: 0,
+    scale: 0.5,
+    y: 50,
+    transition: {
+      duration: 0.25,
+      ease: [0.2, 0.65, 0.3, 0.9],
+    },
   },
   visible: {
     opacity: 1,
+    scale: 1,
+    y: 0,
     transition: {
       duration: 4,
+
+      ease: [0.2, 0.65, 0.3, 0.9],
+    },
+  },
+};
+
+const promptCharacterAnimation = {
+  hidden: {
+    opacity: 0,
+    scale: 0.7,
+    transition: {
+      duration: 1,
+      ease: [0.2, 0.65, 0.3, 0.9],
+    },
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 2,
+      ease: [0.2, 0.65, 0.3, 0.9],
+    },
+  },
+};
+
+const characterAnimation = {
+  hidden: {
+    opacity: 0,
+    scale: 0.7,
+    y: 20,
+    transition: {
+      duration: 0.75,
+      ease: [0.2, 0.65, 0.3, 0.9],
+    },
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.75,
       ease: [0.2, 0.65, 0.3, 0.9],
     },
   },
@@ -136,40 +192,89 @@ const fetchWinePairing = async (query: string) =>
       throw err;
     });
 
+const randomMoveX = (x: number) => ({
+  x: [x, x + Math.random() * 50],
+});
+
+const animateRandomMoveX = (
+  animate: ReturnType<typeof useAnimate>[1],
+  id: string,
+  x: number,
+) =>
+  animate(id, randomMoveX(x), {
+    duration: 10,
+    ease: 'easeInOut',
+    repeatType: 'reverse',
+  });
+
+const animateAllBlobsDefault = async (
+  animate: ReturnType<typeof useAnimate>[1],
+  width: number,
+) => {
+  await Promise.all([
+    animate(
+      '#blob1',
+      {
+        opacity: 1,
+        top: 8,
+        y: 0,
+        x: width / 2 - 100,
+      },
+      { duration: 0.5, ease: 'easeInOut' },
+    ),
+    animate(
+      '#blob2',
+      {
+        opacity: 1,
+        top: 8,
+        y: 0,
+        x: width / 2 - 50,
+      },
+      { duration: 0.5, ease: 'easeInOut' },
+    ),
+    animate(
+      '#blob3',
+      {
+        opacity: 1,
+        top: 8,
+        y: 0,
+        x: width / 2,
+      },
+      { duration: 0.5, ease: 'easeInOut' },
+    ),
+  ]).then(() => {
+    animateRandomMoveX(animate, '#blob1', width / 2 - 100);
+    animateRandomMoveX(animate, '#blob2', width / 2 - 50);
+    animateRandomMoveX(animate, '#blob3', width / 2);
+  });
+};
+
 export default function Home() {
+  const { width, height } = useWindowSize();
+  const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [response, setResponse] = useState<WinePairing[]>();
   const [scope, animate] = useAnimate();
+  const loadingCtrls = useAnimation();
+  const glassCtrls = useAnimation();
   const card1Ref = useRef<HTMLDivElement>(null);
   const card2Ref = useRef<HTMLDivElement>(null);
   const card3Ref = useRef<HTMLDivElement>(null);
   const cardRefs = [card1Ref, card2Ref, card3Ref];
 
-  useEffect(() => {
+  const animateBlobsToCards = () => {
     if (card1Ref.current) {
       const x = card1Ref.current.getBoundingClientRect().x;
       animate(
         '#blob1',
         {
           top: 0,
-          left: 0,
           x: [null, x],
           y: [null, card1Ref.current.getBoundingClientRect().y / 2],
         },
-        { duration: 2, ease: 'easeInOut' },
+        { duration: 1, ease: 'easeInOut' },
       ).then(() => {
-        animate(
-          '#blob1',
-          {
-            x: [
-              x,
-              x + Math.random() * 50,
-              x - Math.random() * 50,
-              x + Math.random() * 50,
-              x,
-            ],
-          },
-          { duration: 10, ease: 'easeInOut' },
-        );
+        animateRandomMoveX(animate, '#blob1', x);
       });
     }
     if (card2Ref.current) {
@@ -178,25 +283,12 @@ export default function Home() {
         '#blob2',
         {
           top: 0,
-          left: 0,
           x: [null, x],
           y: [null, card2Ref.current.getBoundingClientRect().y / 2],
         },
-        { duration: 2, ease: 'easeInOut', delay: 0.2 },
+        { duration: 1, ease: 'easeInOut', delay: 0.1 },
       ).then(() => {
-        animate(
-          '#blob2',
-          {
-            x: [
-              x,
-              x + Math.random() * 50,
-              x - Math.random() * 50,
-              x + Math.random() * 50,
-              x,
-            ],
-          },
-          { duration: 10, ease: 'easeInOut' },
-        );
+        animateRandomMoveX(animate, '#blob2', x);
       });
     }
     if (card3Ref.current) {
@@ -205,122 +297,187 @@ export default function Home() {
         '#blob3',
         {
           top: 0,
-          left: 0,
           x: [null, x],
           y: [null, card3Ref.current.getBoundingClientRect().y / 2],
         },
-        { duration: 2, ease: 'easeInOut', delay: 0.4 },
+        { duration: 1, ease: 'easeInOut', delay: 0.2 },
       ).then(() => {
-        animate(
-          '#blob3',
-          {
-            x: [
-              x,
-              x + Math.random() * 50,
-              x - Math.random() * 50,
-              x + Math.random() * 50,
-              x,
-            ],
-          },
-          { duration: 10, ease: 'easeInOut' },
-        );
+        animateRandomMoveX(animate, '#blob3', x);
       });
     }
-  }, [scope, card1Ref, card2Ref, card3Ref, response]);
+  };
 
-  const blob1InitialPos = window.innerWidth / 5 + 100;
-  const blob2InitialPos = (window.innerWidth / 5) * 2;
-  const blob3InitialPos = (window.innerWidth / 5) * 3 - 100;
+  useEffect(() => {
+    if (width > 800) {
+      animateAllBlobsDefault(animate, width);
+    }
+  }, [width]);
+
+  useEffect(() => {
+    if (width > 800 && response) {
+      animateBlobsToCards();
+    }
+  }, [width, response]);
+
+  useEffect(() => {
+    if (width > 800 && focused) {
+      animateAllBlobsDefault(animate, width);
+    }
+  }, [width, focused]);
+
+  useEffect(() => {
+    if (loading) {
+      setResponse([]);
+      loadingCtrls.start('visible').then(() => {
+        setTimeout(() => {
+          loadingCtrls.start('hidden');
+        }, 3000);
+      });
+      glassCtrls.start('visible').then(() => {
+        setTimeout(() => {
+          glassCtrls.start('hidden');
+        }, 3000);
+      });
+    }
+    if (!loading) {
+      loadingCtrls.start('hidden');
+      glassCtrls.start('hidden');
+    }
+  }, [loading]);
+
+  useEffect(() => {}, [scope, card1Ref, card2Ref, card3Ref, response]);
 
   return (
     <main className='flex flex-col items-center justify-center h-screen min-w-screen bg-slate-800'>
-      <div
-        className='absolute inset-x-0 inset-y-0 h-screen w-screen'
-        ref={scope}
-        id='blobs'
-      >
-        <motion.div
-          animate={{
-            x: [
-              blob1InitialPos,
-              blob1InitialPos + Math.random() * 50,
-              blob1InitialPos - Math.random() * 50,
-              blob1InitialPos + Math.random() * 50,
-              blob1InitialPos,
-            ],
-            y: [
-              0,
-              0 + Math.random() * 50,
-              0 - Math.random() * 50,
-              0 + Math.random() * 50,
-              0,
-            ],
-          }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-          id='blob1'
-          className='absolute rounded-full mix-blend-screen filter blur-2xl top-8 opacity-70 w-72 h-72 bg-cyan-500'
-        />
-        <motion.div
-          animate={{
-            x: [
-              blob2InitialPos,
-              blob2InitialPos + Math.random() * 50,
-              blob2InitialPos - Math.random() * 50,
-              blob2InitialPos + Math.random() * 50,
-              blob2InitialPos,
-            ],
-            y: [
-              0,
-              0 + Math.random() * 50,
-              0 - Math.random() * 50,
-              0 + Math.random() * 50,
-              0,
-            ],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          id='blob2'
-          className='absolute rounded-full mix-blend-screen filter blur-2xl top-8 opacity-70 w-72 h-72 bg-indigo-500'
-        />
-        <motion.div
-          animate={{
-            x: [
-              blob3InitialPos,
-              blob3InitialPos + Math.random() * 50,
-              blob3InitialPos - Math.random() * 50,
-              blob3InitialPos + Math.random() * 50,
-              blob3InitialPos,
-            ],
-            y: [
-              0,
-              0 + Math.random() * 50,
-              0 - Math.random() * 50,
-              0 + Math.random() * 50,
-              0,
-            ],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          id='blob3'
-          className='absolute rounded-full mix-blend-screen filter blur-2xl top-8 opacity-70 w-72 h-72 bg-orange-500'
-        />
-      </div>
+      <Blobs {...{ scope, width, height }} />
       <div className='w-full max-w-2xl'>
-        <FormInput {...{ response, setResponse }} />
+        <FormInput
+          {...{
+            loading,
+            setLoading,
+            focused,
+            setFocused,
+            response,
+            setResponse,
+          }}
+        />
       </div>
-      <div className='h-3/5'>
+      <Loading {...{ loading, loadingCtrls, glassCtrls }} />
+      <div className='relative h-3/5'>
         <CardDisplay cardRefs={cardRefs} pairings={response} />
       </div>
     </main>
   );
 }
 
+function Loading({
+  loading,
+  loadingCtrls,
+  glassCtrls,
+}: {
+  loading: boolean;
+  loadingCtrls: AnimationControls;
+  glassCtrls: AnimationControls;
+}) {
+  return (
+    <div className='relative'>
+      {'Hang tight while our Sommelier finds the perfect wines for you...'
+        .split(' ')
+        .map((word, index) => (
+          <motion.span
+            className='mr-1 inline-block text-3xl font-black text-white'
+            aria-hidden='true'
+            initial='hidden'
+            animate={loadingCtrls}
+            variants={wordAnimation}
+            transition={{
+              delayChildren: index * 0.15,
+              staggerChildren: 0.02,
+            }}
+          >
+            {word.split('').map((character, index) => {
+              return (
+                <motion.span
+                  className='inline-block'
+                  key={`${character}-${index}`}
+                  variants={characterAnimation}
+                >
+                  {character}
+                </motion.span>
+              );
+            })}
+          </motion.span>
+        ))}
+      {loading && (
+        <motion.div
+          initial='hidden'
+          animate={glassCtrls}
+          variants={glassAnimation}
+          className='mt-24 absolute inset-x-0 justify-center'
+        >
+          <div className='glass-ctr'>
+            <div className='glass'></div>
+            <div className='water-ctr'>
+              <div className='water'></div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+function Blobs({
+  scope,
+  width,
+  height,
+}: {
+  scope: AnimationScope<any>;
+  width: number;
+  height: number;
+}) {
+  return (
+    <div
+      className='hidden lg:block absolute h-screen w-screen'
+      ref={scope}
+      id='blobs'
+    >
+      <motion.div
+        initial={{ opacity: 0, top: 8, y: 0, x: width / 2 - 100 }}
+        id='blob1'
+        className='absolute rounded-full mix-blend-screen filter blur-2xl top-8 opacity-70 w-72 h-72 bg-cyan-500'
+      />
+      <motion.div
+        initial={{ opacity: 0, top: 8, y: 0, x: width / 2 - 50 }}
+        id='blob2'
+        className='absolute rounded-full mix-blend-screen filter blur-2xl top-8 opacity-70 w-72 h-72 bg-indigo-500'
+      />
+      <motion.div
+        initial={{ opacity: 0, top: 8, y: 0, x: width / 2 }}
+        id='blob3'
+        className='absolute rounded-full mix-blend-screen filter blur-2xl top-8 opacity-70 w-72 h-72 bg-orange-500'
+      />
+    </div>
+  );
+}
+
 interface FormInputProps {
+  loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
+  focused: boolean;
+  setFocused: Dispatch<SetStateAction<boolean>>;
   response: WinePairing[] | undefined;
   setResponse: Dispatch<SetStateAction<WinePairing[] | undefined>>;
 }
 
-function FormInput({ response, setResponse }: FormInputProps) {
-  const [focused, setFocused] = useState(false);
-  const [loading, setLoading] = useState(false);
+function FormInput({
+  loading,
+  setLoading,
+  focused,
+  setFocused,
+  response,
+  setResponse,
+}: FormInputProps) {
   const [value, setValue] = useState('');
   const inputCtrls = useAnimation();
   const [example, cycleExample] = useCycle(
@@ -330,14 +487,24 @@ function FormInput({ response, setResponse }: FormInputProps) {
   );
 
   useEffect(() => {
-    if (inputCtrls) {
+    if (loading) {
+      inputCtrls.start('hidden');
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (loading) {
+      inputCtrls.start('hidden');
+      return;
+    }
+    if (inputCtrls && !loading) {
       inputCtrls.start('visible').then(() => {
         inputCtrls.start('hidden').then(() => {
           cycleExample();
         });
       });
     }
-  }, [inputCtrls, example]);
+  }, [inputCtrls, example, loading]);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -347,7 +514,7 @@ function FormInput({ response, setResponse }: FormInputProps) {
       setLoading(false);
       console.log('Response', response);
       setResponse(mockData);
-    }, 1000);
+    }, 10000);
   };
 
   return (
@@ -374,11 +541,14 @@ function FormInput({ response, setResponse }: FormInputProps) {
             onBlur={() => {
               setFocused(false);
             }}
+            aria-label='Input'
+            aria-disabled={loading}
+            disabled={loading}
             value={value}
             type='text'
             name='query'
             id='query'
-            className='-ml-3 w-full block flex-1 border-0 bg-transparent text-gray-800 focus:ring-0 sm:text-sm md:text-lg'
+            className='-ml-3 w-full block flex-1 border-0 bg-transparent disabled:select-none disabled:text-gray-500 text-gray-800 focus:ring-0 sm:text-sm md:text-lg'
             placeholder=''
           />
           <span
@@ -389,28 +559,30 @@ function FormInput({ response, setResponse }: FormInputProps) {
               'pointer-events-none flex select-none items-center text-gray-500 absolute inset-y-0 left-28',
             )}
           >
-            <motion.span
-              className='mr-1'
-              aria-hidden='true'
-              initial='hidden'
-              animate={inputCtrls}
-              variants={wordAnimation}
-              transition={{
-                staggerChildren: 0.03,
-              }}
-            >
-              {example.split('').map((character, index) => {
-                return (
+            {example.split(' ').map((word, index) => (
+              <motion.span
+                className='mr-1'
+                aria-hidden='true'
+                initial='hidden'
+                animate={inputCtrls}
+                variants={wordAnimation}
+                transition={{
+                  delayChildren: index * 0.2,
+                  staggerChildren: 0.03,
+                }}
+              >
+                {word.split('').map((character, index) => (
                   <motion.span
+                    className='inline-block'
                     aria-hidden='true'
                     key={index}
-                    variants={characterAnimation}
+                    variants={promptCharacterAnimation}
                   >
                     {character}
                   </motion.span>
-                );
-              })}
-            </motion.span>
+                ))}
+              </motion.span>
+            ))}
           </span>
         </div>
         <button className='flex flex-row justify-center items-center w-16 h-10 p-2 rounded-lg shadow-sm bg-indigo-500 text-white'>
@@ -454,6 +626,8 @@ function CardDisplay({ cardRefs, pairings }: CardDisplayProps) {
   useEffect(() => {
     if (pairings?.length) {
       cardCtrls.start('visible');
+    } else {
+      cardCtrls.start('hidden');
     }
   }, [pairings]);
 
@@ -516,3 +690,30 @@ const Card = forwardRef<HTMLDivElement, Card>(({ wine }: Card, ref) => {
     </motion.div>
   );
 });
+
+// Hook
+function useWindowSize() {
+  // Initialize state with undefined width/height so server and client renders match
+  // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
+  const [windowSize, setWindowSize] = useState({
+    width: 0,
+    height: 0,
+  });
+  useEffect(() => {
+    // Handler to call on window resize
+    function handleResize() {
+      // Set window width/height to state
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
+    // Remove event listener on cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Empty array ensures that effect is only run on mount
+  return windowSize;
+}
