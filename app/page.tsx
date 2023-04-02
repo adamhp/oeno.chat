@@ -83,7 +83,7 @@ const characterAnimation = {
   visible: {
     opacity: 1,
     transition: {
-      duration: 1,
+      duration: 4,
       ease: [0.2, 0.65, 0.3, 0.9],
     },
   },
@@ -138,13 +138,10 @@ const fetchWinePairing = async (query: string) =>
 
 export default function Home() {
   const [response, setResponse] = useState<WinePairing[]>();
+  const [scope, animate] = useAnimate();
   const card1Ref = useRef<HTMLDivElement>(null);
   const card2Ref = useRef<HTMLDivElement>(null);
   const card3Ref = useRef<HTMLDivElement>(null);
-  const blob1Ref = useRef<HTMLDivElement>(null);
-  const blob2Ref = useRef<HTMLDivElement>(null);
-  const blob3Ref = useRef<HTMLDivElement>(null);
-  const [scope, animate] = useAnimate();
   const cardRefs = [card1Ref, card2Ref, card3Ref];
 
   useEffect(() => {
@@ -334,13 +331,11 @@ function FormInput({ response, setResponse }: FormInputProps) {
 
   useEffect(() => {
     if (inputCtrls) {
-      inputCtrls.start('visible');
-      setTimeout(() => {
-        inputCtrls.start('hidden');
-        setTimeout(() => {
+      inputCtrls.start('visible').then(() => {
+        inputCtrls.start('hidden').then(() => {
           cycleExample();
-        }, 1000);
-      }, 5000);
+        });
+      });
     }
   }, [inputCtrls, example]);
 
@@ -366,7 +361,7 @@ function FormInput({ response, setResponse }: FormInputProps) {
         className='p-5 bg-white rounded-lg flex items-center justify-between space-x-4'
       >
         <div className='sm:text-sm md:text-lg h-10 relative flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md md:max-w-lg w-full'>
-          <span className='flex select-none items-center pl-3 text-gray-500 '>
+          <span className='flex select-none items-center pl-3 text-gray-500 w-28'>
             I'm cooking
           </span>
           <input
@@ -383,7 +378,7 @@ function FormInput({ response, setResponse }: FormInputProps) {
             type='text'
             name='query'
             id='query'
-            className='w-full block flex-1 border-0 bg-transparent pl-1.5 text-gray-800 focus:ring-0 sm:text-sm md:text-lg'
+            className='-ml-3 w-full block flex-1 border-0 bg-transparent text-gray-800 focus:ring-0 sm:text-sm md:text-lg'
             placeholder=''
           />
           <span
@@ -391,35 +386,31 @@ function FormInput({ response, setResponse }: FormInputProps) {
               {
                 hidden: !!value,
               },
-              'pointer-events-none flex select-none items-center text-gray-500 absolute inset-y-0 left-32',
+              'pointer-events-none flex select-none items-center text-gray-500 absolute inset-y-0 left-28',
             )}
           >
-            {example.split(' ').map((word, index) => (
-              <motion.span
-                className='mr-1'
-                aria-hidden='true'
-                key={index}
-                initial='hidden'
-                animate={inputCtrls}
-                variants={wordAnimation}
-                transition={{
-                  delayChildren: index * 0.2,
-                  staggerChildren: 0.025,
-                }}
-              >
-                {word.split('').map((character, index) => {
-                  return (
-                    <motion.span
-                      aria-hidden='true'
-                      key={index}
-                      variants={characterAnimation}
-                    >
-                      {character}
-                    </motion.span>
-                  );
-                })}
-              </motion.span>
-            ))}
+            <motion.span
+              className='mr-1'
+              aria-hidden='true'
+              initial='hidden'
+              animate={inputCtrls}
+              variants={wordAnimation}
+              transition={{
+                staggerChildren: 0.03,
+              }}
+            >
+              {example.split('').map((character, index) => {
+                return (
+                  <motion.span
+                    aria-hidden='true'
+                    key={index}
+                    variants={characterAnimation}
+                  >
+                    {character}
+                  </motion.span>
+                );
+              })}
+            </motion.span>
           </span>
         </div>
         <button className='flex flex-row justify-center items-center w-16 h-10 p-2 rounded-lg shadow-sm bg-indigo-500 text-white'>
