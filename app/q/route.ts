@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, OpenAIApi } from 'openai';
 
-export const config = {
-  runtime: 'edge',
-};
-
 if (!process.env.OPENAI_API_KEY) {
   console.warn('Missing OPENAI_API_KEY environment variable');
 }
