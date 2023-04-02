@@ -1,6 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Configuration, OpenAIApi } from 'openai';
-import * as fs from 'fs';
+
+export const config = {
+  runtime: 'edge',
+};
 
 if (!process.env.OPENAI_API_KEY) {
   console.warn('Missing OPENAI_API_KEY environment variable');
@@ -12,7 +15,7 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   // Get query from request body
   const query = await request.json();
 
@@ -44,17 +47,6 @@ export async function POST(request: Request) {
       const message = completion.data.choices[0].message;
       response = JSON.parse(message.content);
     }
-    // Append to log for debugging
-    fs.appendFile(
-      '/tmp/log',
-      JSON.stringify(response, null, 2) + '\n---\n',
-      function (err) {
-        if (err) {
-          return console.log(err);
-        }
-        console.log('The file was saved!');
-      },
-    );
     return NextResponse.json(response);
   } catch (error) {
     return NextResponse.json(
