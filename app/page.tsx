@@ -19,6 +19,7 @@ import {
   useAnimation,
   useCycle,
 } from 'framer-motion';
+import Link from 'next/link';
 
 interface WinePairing {
   grape: string;
@@ -747,12 +748,22 @@ const Card = forwardRef<HTMLDivElement, Card>(
           ))}
         </ul>
         <div>
-          <span className='mt-4 text-gray-700 font-semibold mb-4'>
+          <span className='mt-4 text-gray-700 font-semibold'>
             Recommendations:
           </span>
-          <ul className='ml-2 space-y-2'>
+          <ul className='ml-2 space-y-3'>
             {wine.recommendations.map((rec, index) => (
-              <li key={`${wine.grape}-rec-${index}`}>{rec}</li>
+              <li key={`${wine.grape}-rec-${index}`}>
+                <a
+                  target='_blank'
+                  className='font-semibold text-indigo-600 hover:text-indigo-900'
+                  href={`https://drizly.com/search?q=${encodeURIComponent(
+                    rec,
+                  )}`}
+                >
+                  {rec}
+                </a>
+              </li>
             ))}
           </ul>
         </div>
