@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import './globals.css';
 import { Inter } from 'next/font/google';
 
@@ -50,6 +51,8 @@ export const metadata = {
   publisher: 'Adam Pearce & Mike Danello',
 };
 
+const env = process.env.NODE_ENV;
+
 export default function RootLayout({
   children,
 }: {
@@ -57,6 +60,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en' className={inter.className}>
+      {env == 'production' && (
+        <>
+          <Script
+            src='https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID'
+            strategy='afterInteractive'
+          />
+          <Script id='google-analytics' strategy='afterInteractive'>
+            {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){window.dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
+        `}
+          </Script>
+        </>
+      )}
       <body>{children}</body>
     </html>
   );
